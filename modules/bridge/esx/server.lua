@@ -12,7 +12,7 @@ end)
 
 local ESX
 
-SetTimeout(500, function()
+SetTimeout(5000, function()
 	ESX = exports.es_extended:getSharedObject()
 
 	if ESX.CreatePickup then

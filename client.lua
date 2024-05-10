@@ -93,8 +93,7 @@ local isClothingOpen = false
 local function showFrontendPed()
 	print("showFrontendPed")
 
-	Wait(100)
-	SetMouseCursorVisibleInMenus(false)
+	
 	if frontendPed then
 		DeleteEntity(frontendPed)
 	end
@@ -141,6 +140,8 @@ local function onOpenInventory()
 		SetFrontendActive(true)
 		ActivateFrontendMenu(GetHashKey('FE_MENU_VERSION_EMPTY'), false, 42)
 		SetScriptGfxAlign(67, 67)
+		Wait(100)
+		SetMouseCursorVisibleInMenus(false)
 		if isClothingOpen then
 			showFrontendPed()
 		end
@@ -192,6 +193,8 @@ local function getGender()
 	end
 end
 
+
+
 local ESX = exports['es_extended']:getSharedObject()
 
 local function refreshPlayerClothing(updatePed)
@@ -201,13 +204,15 @@ local function refreshPlayerClothing(updatePed)
 		local p = promise.new()
 		ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin)
 			if skin == nil then
+				p:resolve(nil)
 			else
 				TriggerEvent('skinchanger:loadSkin', skin)
 				Wait(100)
-				p:resolve()
+				p:resolve(skin)
 			end
 		end)
-		Citizen.Await(p)
+		local savedSkin = Citizen.Await(p)
+		if not savedSkin then return end
 	end
 
 	local clothing = PlayerData.clothing
@@ -265,6 +270,9 @@ local function refreshPlayerClothing(updatePed)
 end
 
 exports('refreshPlayerClothing', refreshPlayerClothing)
+AddEventHandler("onCharacterCreated", function()
+	refreshPlayerClothing()
+end)
 
 RegisterNUICallback("screenshot:takeScreenshot", function(body, resultCallback)
 	client.closeInventory()
@@ -357,7 +365,7 @@ function client.openInventory(inv, data)
 	if inv == 'dumpster' and cache.vehicle then
 		return lib.notify({ id = 'inventory_right_access', type = 'error', description = locale('inventory_right_access') })
 	end
-
+	print(canOpenInventory())
 	if canOpenInventory() then
 		local left, right
 
@@ -947,6 +955,7 @@ local function registerCommands()
 		description = locale('open_player_inventory'),
 		defaultKey = client.keys[1],
 		onPressed = function()
+			print("onpress open inven tory")
 			if invOpen then
 				return client.closeInventory()
 			end
@@ -1378,7 +1387,7 @@ end)
 RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inventory, weight, player, clothing)
 	print(json.encode(clothing))
 	if source == '' then return end
-
+	print(2)
 	---@class PlayerData
 	---@field inventory table<number, SlotWithItem?>
 	---@field weight number
@@ -1387,6 +1396,7 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 	PlayerData.source = cache.serverId
 	PlayerData.maxWeight = shared.playerweight
 	PlayerData.clothing = clothing
+	print(211)
 	refreshPlayerClothing()
 	setmetatable(PlayerData, {
 		__index = function(self, key)
@@ -1395,9 +1405,10 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 			end
 		end
 	})
+	print(212)
 
 	if setStateBagHandler then setStateBagHandler(('player:%s'):format(cache.serverId)) end
-
+	print(21)
 	local ItemData = table.create(0, #Items)
 
 	for _, v in pairs(Items --[[@as table<string, OxClientItem>]]) do
@@ -1420,6 +1431,7 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 			image = v.client?.image
 		}
 	end
+	print(22)
 
 	for _, data in pairs(inventory) do
 		local item = Items[data.name]
@@ -1436,6 +1448,7 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 	end
 
 	local phone = Items.phone
+	print(23)
 
 	if phone and phone.count < 1 then
 		pcall(function()
@@ -1447,6 +1460,7 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 	client.setPlayerData('weight', weight)
 	currentWeapon = nil
 	Weapon.ClearAll()
+	print(24)
 
 	local uiLocales = {}
 	local locales = lib.getLocales()
@@ -1456,6 +1470,7 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 			uiLocales[k] = v
 		end
 	end
+	print(25)
 
 	uiLocales['$'] = locales['$']
 	uiLocales.ammo_type = locales.ammo_type
@@ -1497,6 +1512,7 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 			lib.hideTextUI()
 		end
 	end
+	print(26)
 
 	for id, data in pairs(lib.load('data.licenses')) do
 		lib.points.new({
@@ -1511,8 +1527,9 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 				locale('interact_prompt', GetControlInstructionalButton(0, 38, true):sub(3)))
 		})
 	end
-
+	print(27)
 	while not client.uiLoaded do Wait(50) end
+	print(28)
 
 	SendNUIMessage({
 		action = 'init',
@@ -1535,8 +1552,11 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 	Shops.refreshShops()
 	Inventory.Stashes()
 	Inventory.Evidence()
-
-	if registerCommands then registerCommands() end
+	print(3)
+	if registerCommands then
+		print(4)
+		registerCommands() 
+	end
 
 	TriggerEvent('ox_inventory:updateInventory', PlayerData.inventory)
 

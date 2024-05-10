@@ -114,6 +114,7 @@ end
 ---@return boolean|table|nil
 ---@return table?
 local function openInventory(source, invType, data, ignoreSecurityChecks)
+	print(source, invType)
 	if Inventory.Lock then return false end
 
 	local left = Inventory(source) --[[@as OxInventory]]
