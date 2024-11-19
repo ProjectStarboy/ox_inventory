@@ -1,3 +1,5 @@
+
+
 fx_version 'cerulean'
 use_experimental_fxv2_oal 'yes'
 lua54 'yes'
@@ -15,7 +17,10 @@ dependencies {
     'ox_lib',
 }
 
-shared_script '@ox_lib/init.lua'
+shared_script {
+    '@ox_lib/init.lua',
+    '@es_extended/imports.lua'
+}
 
 ox_libs {
     'locale',

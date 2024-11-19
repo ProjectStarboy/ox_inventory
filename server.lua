@@ -107,6 +107,14 @@ local function getClosestStashCoords(playerPed, coordinates, distance)
 	return #(coordinates - playerCoords) < distance and coordinates
 end
 
+lib.callback.register('lux_vehicleshop:server:isVehicleOwned', function(source, plate)
+    local xPlayer = ESX.GetPlayerFromId(source)
+	local response = MySQL.query.await('SELECT * FROM owned_vehicles WHERE owner=? AND plate=?', {
+		xPlayer.identifier, plate
+	})
+	return (response and response[1] ~= nil or false)
+end)
+
 ---@param source number
 ---@param invType string
 ---@param data? string|number|table
@@ -114,11 +122,9 @@ end
 ---@return boolean|table|nil
 ---@return table?
 local function openInventory(source, invType, data, ignoreSecurityChecks)
-	print(source, invType)
 	if Inventory.Lock then return false end
 
 	local left = Inventory(source) --[[@as OxInventory]]
-	print(json.encode(left.clothing.items))
 	local right, closestCoords
 
 	left:closeInventory(true)
@@ -685,15 +691,12 @@ RegisterNetEvent("ox_inventory:onGenerateClotheDone", function(data)
 	for k, v in pairs(data) do
 		tempClothes[k] = v
 	end
-	print(dump(tempClothes))
 	local file = io.open("cache\\clothes.lua", "w")
 	--[[ local file = LoadResourceFile("ox_inventory", "data/clothes.lua") ]]
-	print(file)
 	if file then
 		--[[ file:write("return " .. dump(tempClothes)) ]]
 		file:write("return {\n")
 		for k, v in pairs(tempClothes) do
-			print(k)
 			file:write(string.format("\t['%s'] = {\n", k))
 			for key, value in pairs(v) do
 				if type(value) == "string" then
@@ -707,6 +710,40 @@ RegisterNetEvent("ox_inventory:onGenerateClotheDone", function(data)
 		file:write("}\n")
 		file:close()
 	else
-		print("Failed to open file")
 	end
 end)
+
+AddEventHandler("esx:levelUpdate", function(playerId, level)
+	local xPlayer = ESX.GetPlayerFromId(playerId)
+	local LevelData = xPlayer.getMeta("level") and xPlayer.getMeta("level") or {}
+	if not LevelData["level"..level] then 
+		LevelData["level"..level] = true 
+		xPlayer.setMeta("level", LevelData)
+		xPlayer.addInventoryItem("homlevelup", 1)
+	end
+end)
+
+AddEventHandler("esx:levelTanThu", function(playerId, level)
+	local xPlayer = ESX.GetPlayerFromId(playerId)
+	local levelKey = "level" .. level
+	local LevelData = xPlayer.getMeta("level") or {}
+  
+	if not LevelData[levelKey] then 
+	  -- Đánh dấu level này đã nhận
+	  LevelData[levelKey] = true 
+	  xPlayer.setMeta("level", LevelData)
+  
+	  -- Danh sách các vật phẩm cần thêm
+	  local itemsToAdd = {
+		"homtanthu1",
+		"homtanthu2",
+		"balo_level_1"
+	  }
+  
+	  -- Loop qua từng item và thêm vào hòm đồ
+	  for _, item in ipairs(itemsToAdd) do
+		xPlayer.addInventoryItem(item, 1)
+	  end
+	end
+  end)
+  

@@ -91,9 +91,6 @@ local currentInventory = defaultInventory
 local isClothingOpen = false
 
 local function showFrontendPed()
-	print("showFrontendPed")
-
-	
 	if frontendPed then
 		DeleteEntity(frontendPed)
 	end
@@ -109,7 +106,6 @@ local function showFrontendPed()
 end
 
 local function hideFrontendPed()
-	print("hideFrontendPed")
 	if (frontendPed) then DeletePed(frontendPed) end
 	frontendPed = nil
 	SetScriptGfxDrawBehindPausemenu(false)
@@ -134,7 +130,6 @@ local function onOpenInventory()
 	end
 	Citizen.CreateThread(function()
 		while not HasStreamedTextureDictLoaded("lr-texture") do
-			print("loading texture")
 			Wait(0)
 		end
 		SetFrontendActive(true)
@@ -169,7 +164,6 @@ local function onOpenInventory()
 end
 
 local function onCloseInventory()
-	print("onCloseInventory")
 	SetFrontendActive(false)
 	SetScriptGfxDrawBehindPausemenu(false)
 	ClearPedInPauseMenu()
@@ -198,22 +192,17 @@ end
 local ESX = exports['es_extended']:getSharedObject()
 
 local function refreshPlayerClothing(updatePed)
+	-- TriggerEvent("tgiann-clothing:refreshSkin", true)
 	if not PlayerData.clothing then return end
 	local ped = updatePed or cache.ped
 	if not updatePed then
 		local p = promise.new()
-		ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin)
-			if skin == nil then
-				p:resolve(nil)
-			else
-				TriggerEvent('skinchanger:loadSkin', skin)
+				TriggerEvent("tgiann-clothing:refreshSkin", true)
 				Wait(100)
-				p:resolve(skin)
+				p:resolve(skinData)
+				local savedSkin = Citizen.Await(p)
+				if not savedSkin then return end
 			end
-		end)
-		local savedSkin = Citizen.Await(p)
-		if not savedSkin then return end
-	end
 
 	local clothing = PlayerData.clothing
 
@@ -292,7 +281,6 @@ RegisterCommand("testscreenshot", function(source, args, rawCommand)
 		name = 'male_component_11_16_0',
 		gender = 'male'
 	}, function(url)
-		print(url)
 	end)
 end, false)
 
@@ -365,7 +353,6 @@ function client.openInventory(inv, data)
 	if inv == 'dumpster' and cache.vehicle then
 		return lib.notify({ id = 'inventory_right_access', type = 'error', description = locale('inventory_right_access') })
 	end
-	print(canOpenInventory())
 	if canOpenInventory() then
 		local left, right
 
@@ -468,7 +455,6 @@ function client.openInventory(inv, data)
 			currentInventory = right or defaultInventory
 			left.items = PlayerData.inventory
 			left.groups = PlayerData.groups
-			print(json.encode(left))
 			SendNUIMessage({
 				action = 'setupInventory',
 				data = {
@@ -638,6 +624,11 @@ local function useItem(data, cb, noAnim)
 	if not slotData or not canUseItem(data.ammo and true) then return end
 
 	if currentWeapon?.timer and currentWeapon.timer > 100 then return end
+
+	if data.groups and not client.hasGroup(data.groups) then 
+		exports['okokNotify']:Alert('Thành Phố Báo Đời', 'Bạn không có quyền để sử dụng.', 5000, 'error', true)
+		return 
+	end
 
 	if invOpen and data.close then client.closeInventory() end
 
@@ -955,7 +946,6 @@ local function registerCommands()
 		description = locale('open_player_inventory'),
 		defaultKey = client.keys[1],
 		onPressed = function()
-			print("onpress open inven tory")
 			if invOpen then
 				return client.closeInventory()
 			end
@@ -1022,7 +1012,13 @@ local function registerCommands()
 			end
 
 			if entityType ~= 2 then return end
-
+			local vehiclePlate = GetVehicleNumberPlateText(entity)
+			local isOwned = lib.callback.await('lux_vehicleshop:server:isVehicleOwned', false, vehiclePlate)
+			local PlayerData = ESX.GetPlayerData()
+			if not (PlayerData.job.name == 'police' and PlayerData.job.grade > 3) and not isOwned then 
+				exports['okokNotify']:Alert('Thành Phố Báo Đời', 'Phương Tiện Này Không Phải Của Bạn', 5000, 'error', true)
+				 return 
+			end
 			Inventory.OpenTrunk(entity)
 		end
 	})
@@ -1111,7 +1107,6 @@ local function updateInventory(data, weight)
 	local changes = {}
 	---@type table<string, number>
 	local itemCount = {}
-	print('updateInventory', json.encode(data))
 	for i = 1, #data do
 		local v = data[i]
 
@@ -1226,9 +1221,14 @@ end)
 ---@param point CPoint
 local function nearbyDrop(point)
 	if not point.instance or point.instance == currentInstance then
+		if not client.dropprops then
 		---@diagnostic disable-next-line: param-type-mismatch
 		DrawMarker(2, point.coords.x, point.coords.y, point.coords.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3, 0.2, 0.15, 150, 30,
 			30, 222, false, false, 0, true, false, false, false)
+	end
+	if point.currentDistance < 5 then
+		Utils.drawText3D(point.coords.x, point.coords.y, point.coords.z, (point.removeTime - GlobalState.OsTime).."s", 0.3)
+		end
 	end
 end
 
@@ -1265,14 +1265,14 @@ local function createDrop(dropId, data)
 		distance = 16,
 		invId = dropId,
 		instance = data.instance,
-		model = data.model
+		model = data.model,
+		removeTime = data.removeTime,
 	})
 
 	if point.model or client.dropprops then
 		point.distance = 30
 		point.onEnter = onEnterDrop
 		point.onExit = onExitDrop
-	else
 		point.nearby = nearbyDrop
 	end
 
@@ -1385,9 +1385,7 @@ end)
 
 
 RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inventory, weight, player, clothing)
-	print(json.encode(clothing))
 	if source == '' then return end
-	print(2)
 	---@class PlayerData
 	---@field inventory table<number, SlotWithItem?>
 	---@field weight number
@@ -1396,7 +1394,6 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 	PlayerData.source = cache.serverId
 	PlayerData.maxWeight = shared.playerweight
 	PlayerData.clothing = clothing
-	print(211)
 	refreshPlayerClothing()
 	setmetatable(PlayerData, {
 		__index = function(self, key)
@@ -1405,10 +1402,8 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 			end
 		end
 	})
-	print(212)
 
 	if setStateBagHandler then setStateBagHandler(('player:%s'):format(cache.serverId)) end
-	print(21)
 	local ItemData = table.create(0, #Items)
 
 	for _, v in pairs(Items --[[@as table<string, OxClientItem>]]) do
@@ -1431,7 +1426,6 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 			image = v.client?.image
 		}
 	end
-	print(22)
 
 	for _, data in pairs(inventory) do
 		local item = Items[data.name]
@@ -1448,7 +1442,6 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 	end
 
 	local phone = Items.phone
-	print(23)
 
 	if phone and phone.count < 1 then
 		pcall(function()
@@ -1460,7 +1453,6 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 	client.setPlayerData('weight', weight)
 	currentWeapon = nil
 	Weapon.ClearAll()
-	print(24)
 
 	local uiLocales = {}
 	local locales = lib.getLocales()
@@ -1470,7 +1462,6 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 			uiLocales[k] = v
 		end
 	end
-	print(25)
 
 	uiLocales['$'] = locales['$']
 	uiLocales.ammo_type = locales.ammo_type
@@ -1512,7 +1503,6 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 			lib.hideTextUI()
 		end
 	end
-	print(26)
 
 	for id, data in pairs(lib.load('data.licenses')) do
 		lib.points.new({
@@ -1527,9 +1517,7 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 				locale('interact_prompt', GetControlInstructionalButton(0, 38, true):sub(3)))
 		})
 	end
-	print(27)
 	while not client.uiLoaded do Wait(50) end
-	print(28)
 
 	SendNUIMessage({
 		action = 'init',
@@ -1552,9 +1540,7 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 	Shops.refreshShops()
 	Inventory.Stashes()
 	Inventory.Evidence()
-	print(3)
 	if registerCommands then
-		print(4)
 		registerCommands() 
 	end
 
@@ -1655,10 +1641,10 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 				EnableControlAction(0, 31, true)
 			end
 		else
-			if invBusy then
-				DisableControlAction(0, 23, true)
-				DisableControlAction(0, 36, true)
-			end
+			-- if invBusy then
+			-- 	DisableControlAction(0, 23, true)
+			-- 	DisableControlAction(0, 36, true)
+			-- end
 
 			if usingItem or invBusy == true or IsPedCuffed(playerPed) then
 				DisablePlayerFiring(playerId, true)
@@ -1987,7 +1973,6 @@ local swapActive = false
 
 ---Synchronise and validate all item movement between the NUI and server.
 RegisterNUICallback('swapItems', function(data, cb)
-	print(json.encode(data))
 	if swapActive or not invOpen or invBusy or usingItem then return cb(false) end
 
 	swapActive = true

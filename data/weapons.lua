@@ -715,6 +715,240 @@ return {
 			weight = 600,
 			throwable = true,
 		},
+
+		-- weapon addon 
+		['WEAPON_BLACKMONDAY'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_BLACKMONDAYF'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_BULLETBLUE'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_CANDYLOVE'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_CATBURGLAR'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_CODSQUADPLAID'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_CRANIUM'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_CUDDLEDARK'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_CUTEDUO'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_DARKELF'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_FORESTDWELLER'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_FUTUREBIKER'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_GOATROBE'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_HIPHARE'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_JONESYCUBE'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_JUMPSTART'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_LOLLIPOP'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_MASTERMIND'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_NEONFASHION'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_REDRIDING'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_SKELETON'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_SLEEPYTIME'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_SPOOKYNEON'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_STARWALKER'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_STREETURCHIN'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_TERIYAK'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_THEGOLDEN'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_TOWERSENTINEL'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_TROOPER'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_VIPER'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_WINGEDFURY'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_HULK'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_SPARTANFUTURE'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_TRISTAR'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+
+		['WEAPON_BOARDWALK'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_COMET'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_CYBER'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_DANCER'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_GHOSTHUNTER'] = {
+			label = 'Knife',
+			weight = 300,
+			durability = 0.1,
+		},
+
+		['WEAPON_BAT1'] = {
+			label = 'Gậy Bóng Chày Lv1',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_BAT2'] = {
+			label = 'Gậy Bóng Chày Lv2',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_BAT3'] = {
+			label = 'Gậy Bóng Chày Lv3',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_BAT4'] = {
+			label = 'Gậy Bóng Chày Lv4',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_BAT5'] = {
+			label = 'Gậy Bóng Chày Lv5',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_BAT6'] = {
+			label = 'Gậy Bóng Chày Lv6',
+			weight = 300,
+			durability = 0.1,
+		},
+		['WEAPON_BAT7'] = {
+			label = 'Gậy Bóng Chày Lv7',
+			weight = 300,
+			durability = 0.1,
+		},
 	},
 
 	Components = {

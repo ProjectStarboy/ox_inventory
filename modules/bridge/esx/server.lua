@@ -16,7 +16,6 @@ SetTimeout(5000, function()
 	ESX = exports.es_extended:getSharedObject()
 
 	if ESX.CreatePickup then
-		error('ox_inventory requires a ESX Legacy v1.6.0 or above, refer to the documentation.')
 	end
 
 	server.UseItem = ESX.UseItem
@@ -48,10 +47,10 @@ end
 function server.syncInventory(inv)
 	local accounts = Inventory.GetAccountItemCounts(inv)
 
-    if accounts then
-        local player = server.GetPlayerFromId(inv.id)
-        player.syncInventory(inv.weight, inv.maxWeight, inv.items, accounts)
-    end
+	if accounts then
+		local player = server.GetPlayerFromId(inv.id)
+		player.syncInventory(inv.weight, inv.maxWeight, inv.items, accounts)
+	end
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
@@ -102,10 +101,21 @@ function server.convertInventory(playerId, items)
 
 			if item and count > 0 then
 				local metadata = Items.Metadata(playerId, item, false, count)
-				local weight = Inventory.SlotWeight(item, {count=count, metadata=metadata})
+				local weight = Inventory.SlotWeight(item, { count = count, metadata = metadata })
 				totalWeight = totalWeight + weight
 				slot += 1
-				returnData[slot] = {name = item.name, label = item.label, weight = weight, slot = slot, count = count, description = item.description, metadata = metadata, stack = item.stack, close = item.close}
+				returnData[slot] = {
+					name = item.name,
+					label = item.label,
+					weight = weight,
+					slot = slot,
+					count = count,
+					description =
+							item.description,
+					metadata = metadata,
+					stack = item.stack,
+					close = item.close
+				}
 			end
 		end
 
@@ -121,5 +131,5 @@ function server.isPlayerBoss(playerId)
 end
 
 MySQL.ready(function()
-	MySQL.insert('INSERT IGNORE INTO `licenses` (`type`, `label`) VALUES (?, ?)', { 'weapon', 'Weapon License'})
+	MySQL.insert('INSERT IGNORE INTO `licenses` (`type`, `label`) VALUES (?, ?)', { 'weapon', 'Weapon License' })
 end)

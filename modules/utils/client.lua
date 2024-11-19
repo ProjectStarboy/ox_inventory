@@ -99,6 +99,21 @@ function Utils.DeleteEntity(entity)
 	end
 end
 
+function Utils.drawText3D(x, y, z, text, scale)
+	local onScreen,_x,_y=World3dToScreen2d(x,y,z)
+
+	if onScreen then
+		SetTextScale(scale, scale)
+		SetTextFont(fontId7)
+		SetTextProportional(1)
+		SetTextColour(255, 255, 255, 215)
+		SetTextEntry("STRING")
+		SetTextCentre(1)
+		AddTextComponentString(text)
+		DrawText(_x,_y)
+	end
+end
+
 local rewardTypes = 1 << 0 | 1 << 1 | 1 << 2 | 1 << 3 | 1 << 7 | 1 << 10
 
 -- Enables the weapon wheel, but disables the use of inventory items

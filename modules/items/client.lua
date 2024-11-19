@@ -88,6 +88,12 @@ local ox_inventory = exports[shared.resource]
 -- Clientside item use functions
 -----------------------------------------------------------------------------------------------
 
+for i=1, GetConvarInt('inventory:maxLevelBalo', 5) do
+	Item('balo_level_'..i, function(data, slot)
+		TriggerServerEvent('esx:useitembalo', i)
+	end)
+end
+
 Item('bandage', function(data, slot)
 	local maxHealth = GetEntityMaxHealth(cache.ped)
 	local health = GetEntityHealth(cache.ped)
@@ -97,6 +103,42 @@ Item('bandage', function(data, slot)
 			lib.notify({ description = 'You feel better already' })
 		end
 	end)
+end)
+
+Item('giaplv1', function(data, slot)
+	if GetPedArmour(cache.ped) < 100 then
+		ox_inventory:useItem(data, function(data)
+			if data then
+				SetPlayerMaxArmour(PlayerData.id, 100)
+				SetPedArmour(cache.ped, 30)
+				IsArmouring = {drawable = 1, texture = 0}
+			end
+		end)
+	end
+end)
+
+Item('giaplv2', function(data, slot)
+	if GetPedArmour(cache.ped) < 100 then
+		ox_inventory:useItem(data, function(data)
+			if data then
+				SetPlayerMaxArmour(PlayerData.id, 100)
+				SetPedArmour(cache.ped, 50)
+				IsArmouring = {drawable = 2, texture = 0}
+			end
+		end)
+	end
+end)
+
+Item('giaplv3', function(data, slot)
+	if GetPedArmour(cache.ped) < 100 then
+		ox_inventory:useItem(data, function(data)
+			if data then
+				SetPlayerMaxArmour(PlayerData.id, 100)
+				SetPedArmour(cache.ped, 100)
+				IsArmouring = {drawable = 3, texture = 0}
+			end
+		end)
+	end
 end)
 
 Item('armour', function(data, slot)

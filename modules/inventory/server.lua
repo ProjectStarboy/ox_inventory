@@ -61,7 +61,6 @@ end
 ---@param slots updateSlot[]
 ---@param syncOwner? boolean
 function OxInventory:syncSlotsWithClients(slots, syncOwner)
-	print("OxInventory:syncSlotsWithClients", self.type)
 	for playerId in pairs(self.openedBy) do
 		if self.id ~= playerId then
             local target = Inventories[playerId]
@@ -102,7 +101,6 @@ local GetVehicleNumberPlateText = GetVehicleNumberPlateText
 ---@param player table
 ---@return OxInventory | false | nil
 local function loadInventoryData(data, player)
-	print(data, player)
 	local source = source
 	local inventory
 
@@ -231,15 +229,12 @@ end
 
 setmetatable(Inventory, {
 	__call = function(self, inv, player)
-		print(json.encode(copynof(inv)))
 		if not inv then
 			return self
 		elseif type(inv) == 'table' then
 			if inv.__index then 
-				print("has __index")
 				return inv
 			end
-			print("loading inventory data")
 			return not inv.owner and Inventories[inv.id] or loadInventoryData(inv, player)
 		end
 
@@ -426,6 +421,16 @@ local Items = require 'modules.items.server'
 CreateThread(function()
     Inventory.accounts = server.accounts
     TriggerEvent('ox_inventory:loadInventory', Inventory)
+	GlobalState.OsTime = os.time()
+	while true do
+		Wait(1000)
+		GlobalState.OsTime = os.time()
+		for k, v in pairs(Inventory.Drops) do 
+			if v.removeTime <= GlobalState.OsTime then 
+				Inventory.Remove({type = 'drop', id = k})
+			end
+		end
+	end
 end)
 
 function Inventory.GetAccountItemCounts(inv)
@@ -582,7 +587,6 @@ end, true)
 --- This should only be utilised internally!
 --- To create a stash, please use `exports.ox_inventory:RegisterStash` instead.
 function Inventory.Create(id, label, invType, slots, weight, maxWeight, owner, items, groups, dbId)
-	print("Inventory.Create", id, label, invType, slots, weight, maxWeight, owner,  groups, dbId)
 	if invType == 'player' and hasActiveInventory(id, owner) then return end
 
 	local self = {
@@ -629,7 +633,6 @@ function Inventory.Create(id, label, invType, slots, weight, maxWeight, owner, i
 
 	if not items then
 		self.items, self.weight = Inventory.Load(self.dbId, invType, owner)
-		print('Inventory.Create items', json.encode(self.items))
 	elseif weight == 0 and next(items) then
 		self.weight = Inventory.CalculateWeight(items)
 	end
@@ -1500,6 +1503,7 @@ local function CustomDrop(prefix, items, coords, slots, maxWeight, instance, mod
 		coords = inventory.coords,
 		instance = instance,
 		model = model,
+		removeTime = GlobalState.OsTime + 90,
 	}
 
 	TriggerClientEvent('ox_inventory:createDrop', -1, dropId, Inventory.Drops[dropId])
@@ -1524,7 +1528,9 @@ exports('CreateDropFromPlayer', function(playerId)
 	inventory.coords = vec3(coords.x, coords.y, coords.z-0.2)
 	Inventory.Drops[dropId] = {
 		coords = inventory.coords,
-		instance = Player(playerId).state.instance
+		instance = Player(playerId).state.instance,
+		model = model,
+		removeTime = GlobalState.OsTime + 90,
 	}
 
 	Inventory.Clear(playerInventory)
@@ -1593,7 +1599,7 @@ local function dropItem(source, playerInventory, fromData, data)
 	if not inventory then return end
 
 	inventory.coords = data.coords
-	Inventory.Drops[dropId] = {coords = inventory.coords, instance = data.instance}
+	Inventory.Drops[dropId] = {coords = inventory.coords, instance = data.instance, removeTime = GlobalState.OsTime + 90}
 	playerInventory.changed = true
 
 	TriggerClientEvent('ox_inventory:createDrop', -1, dropId, Inventory.Drops[dropId], playerInventory.open and source, slot)
@@ -1699,12 +1705,10 @@ lib.callback.register('ox_inventory:swapItems', function(source, data)
 
 		if data.toType == "clothing" then 
 			local itemData = clothes[fromData.name]
-			print(json.encode(itemData))
 			if not itemData then return end
 			if itemData.type =='component' then
 				if data.toSlot ~= itemData.c then return end
 			else
-				print(data.toSlot, itemData.c+12)
 				if data.toSlot ~= itemData.c+12 then return end
 			end
 		end
