@@ -1713,6 +1713,19 @@ lib.callback.register('ox_inventory:swapItems', function(source, data)
 			end
 		end
 
+		if data.fromType == 'clothing' then 
+			local fromData = fromInventory.clothes[data.fromSlot]
+			if fromData then
+				local itemData = clothes[fromData.name]
+				if not itemData then return end
+				if itemData.type =='component' then
+					if data.fromSlot ~= itemData.c then return end
+				else
+					if data.fromSlot ~= itemData.c+12 then return end
+				end
+			end
+		end
+
 		if fromData then
 			if fromData.metadata.container and toInventory.type == 'container' then return false end
 			if toData and toData.metadata.container and fromInventory.type == 'container' then 

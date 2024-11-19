@@ -190,10 +190,11 @@ end
 
 
 local ESX = exports['es_extended']:getSharedObject()
-
+local refreshingClothing = false
 local function refreshPlayerClothing(updatePed)
 	-- TriggerEvent("tgiann-clothing:refreshSkin", true)
 	if not PlayerData.clothing then return end
+	refreshingClothing = true
 	local ped = updatePed or cache.ped
 	if not updatePed then
 		local p = promise.new()
@@ -256,6 +257,7 @@ local function refreshPlayerClothing(updatePed)
 			refreshPlayerClothing(frontendPed)
 		end
 	end
+	refreshingClothing = false
 end
 
 exports('refreshPlayerClothing', refreshPlayerClothing)
@@ -1555,7 +1557,9 @@ RegisterNetEvent('ox_inventory:setPlayerInventory', function(currentDrops, inven
 			end
 		elseif invOpen == true then
 			if not canOpenInventory() then
-				client.closeInventory()
+				if not refreshingClothing then
+					client.closeInventory()
+				end
 			else
 				playerCoords = GetEntityCoords(playerPed)
 
